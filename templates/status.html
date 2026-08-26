@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status — QuickDeliver</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="nav-brand">🛵 QuickDeliver</a>
+    </nav>
+
+    <section class="form-section">
+        <div class="form-card">
+            <h2>Order #{{ order['id'] }}</h2>
+
+            <!-- Status Tracker -->
+            <div class="tracker">
+                <div class="tracker-step {{ 'active' if order['status'] in ['pending', 'on the way', 'delivered'] }}">
+                    <div class="tracker-icon">📋</div>
+                    <p>Order Placed</p>
+                </div>
+                <div class="tracker-line {{ 'active' if order['status'] in ['on the way', 'delivered'] }}"></div>
+                <div class="tracker-step {{ 'active' if order['status'] in ['on the way', 'delivered'] }}">
+                    <div class="tracker-icon">🛵</div>
+                    <p>On The Way</p>
+                </div>
+                <div class="tracker-line {{ 'active' if order['status'] == 'delivered' }}"></div>
+                <div class="tracker-step {{ 'active' if order['status'] == 'delivered' }}">
+                    <div class="tracker-icon">✅</div>
+                    <p>Delivered</p>
+                </div>
+            </div>
+
+            <!-- Order Details -->
+            <div class="order-details">
+                <h3>Order Details</h3>
+                <table class="details-table">
+                    <tr><td>Item</td><td><strong>{{ order['item_name'] }}</strong></td></tr>
+                    <tr><td>Quantity</td><td><strong>{{ order['quantity'] }}</strong></td></tr>
+                    <tr><td>Total</td><td><strong>₦{{ "%.2f"|format(order['total_price']) }}</strong></td></tr>
+                    <tr><td>Address</td><td><strong>{{ order['customer_address'] }}</strong></td></tr>
+                    <tr><td>Status</td><td><strong class="status-badge {{ order['status'].replace(' ', '-') }}">{{ order['status'].title() }}</strong></td></tr>
+                </table>
+            </div>
+
+            <!-- Admin Controls -->
+            <div class="admin-controls">
+                <h3>Update Order Status</h3>
+                <form action="/update-status/{{ order['id'] }}" method="POST">
+                    <select name="status" class="status-select">
+                        <option value="pending" {{ 'selected' if order['status'] == 'pending' }}>Pending</option>
+                        <option value="on the way" {{ 'selected' if order['status'] == 'on the way' }}>On The Way</option>
+                        <option value="delivered" {{ 'selected' if order['status'] == 'delivered' }}>Delivered</option>
+                    </select>
+                    <button type="submit" class="btn-submit">Update Status</button>
+                </form>
+            </div>
+
+            <a href="/" class="btn-back">← Back to Menu</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 QuickDeliver. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

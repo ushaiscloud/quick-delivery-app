@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickDeliver — Food Delivery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand">🛵 QuickDeliver</div>
+        <p class="nav-tagline">Fast. Fresh. Delivered.</p>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1>Hungry? We've Got You.</h1>
+        <p>Order your favourite meals and get them delivered to your door.</p>
+    </section>
+
+    <!-- MENU -->
+    <section class="menu-section">
+        <h2>Our Menu</h2>
+        <div class="menu-grid">
+            {% for item in items %}
+            <div class="menu-card">
+                <div class="menu-emoji">🍽️</div>
+                <h3>{{ item['name'] }}</h3>
+                <p class="menu-desc">{{ item['description'] }}</p>
+                <div class="menu-footer">
+                    <span class="price">₦{{ "%.2f"|format(item['price']) }}</span>
+                    <a href="/order/{{ item['id'] }}" class="btn-order">Order Now</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 QuickDeliver. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
