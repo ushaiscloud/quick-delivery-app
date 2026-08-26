@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment — QuickDeliver</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="nav-brand">🛵 QuickDeliver</a>
+        <span class="nav-user">👤 {{ current_user.full_name }}</span>
+    </nav>
+
+    <section class="form-section">
+        <div class="form-card">
+            <h2>Complete Payment</h2>
+
+            <!-- Order Summary -->
+            <div class="payment-summary">
+                <h3>Order Summary</h3>
+                <table class="details-table">
+                    <tr>
+                        <td>Item</td>
+                        <td><strong>{{ order['item_name'] }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Quantity</td>
+                        <td><strong>{{ order['quantity'] }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Item Total</td>
+                        <td><strong>₦{{ "%.2f"|format(order['total_price']) }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Delivery Fee</td>
+                        <td><strong>₦{{ "%.2f"|format(order['delivery_fee']) }}</strong></td>
+                    </tr>
+                    <tr class="grand-total-row">
+                        <td>Grand Total</td>
+                        <td><strong class="grand-total">₦{{ "%.2f"|format(grand_total) }}</strong></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="delivery-info">
+                <p>📍 Delivering to: <strong>{{ order['delivery_address'] }}</strong></p>
+            </div>
+
+            <!-- Paystack Button -->
+            <button
+                onclick="payWithPaystack()"
+                class="btn-submit btn-pay">
+                💳 Pay ₦{{ "%.2f"|format(grand_total) }} with Paystack
+            </button>
+
+            <a href="/" class="btn-back">← Cancel and go back</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 QuickDeliver. Secured by Paystack 🔒</p>
+    </footer>
+
+    <!-- Paystack Script -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script>
+        function payWithPaystack() {
+            var handler = PaystackPop.setup({
+                key: '{{ paystack_public_key }}',
+                email: '{{ current_user.email }}',
+                amount: {{ (grand_total * 100)|int }},  // Paystack uses kobo
+                currency: 'NGN',
+                ref: 'QD-' + Math.floor(Math.random() * 1000000000),
+                metadata: {
+                    order_id: '{{ order["id"] }}',
+                    customer_name: '{{ current_user.full_name }}'
+                },
+                callback: function(response) {
+                    // Payment successful — verify on backend
+                    window.location.href = '/verify-payment/{{ order["id"] }}?reference=' + response.reference;
+                },
+                onClose: function() {
+                    alert('Payment cancelled. Your order is saved — you can pay later.');
+                }
+            });
+            handler.openIframe();
+        }
+    </script>
+
+</body>
+</html>

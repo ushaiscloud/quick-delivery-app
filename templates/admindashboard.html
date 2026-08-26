@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — QuickDeliver</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/admin" class="nav-brand">🛵 QuickDeliver Admin</a>
+        <div class="nav-right">
+            <span class="nav-user">🔐 {{ current_user.full_name }}</span>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <section class="dashboard-section">
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <p class="stat-number">₦{{ "%.2f"|format(total_revenue) }}</p>
+                <p class="stat-label">Total Revenue</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-number">{{ total_orders }}</p>
+                <p class="stat-label">Total Orders</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-number">{{ pending }}</p>
+                <p class="stat-label">Pending Orders</p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Orders Table -->
+        <h2>All Orders</h2>
+        {% if orders %}
+        <div class="table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order['id'] }}</td>
+                        <td>
+                            <strong>{{ order['customer_name'] }}</strong>
+                            <br><small>{{ order['customer_phone'] }}</small>
+                        </td>
+                        <td>{{ order['item_name'] }}</td>
+                        <td>{{ order['quantity'] }}</td>
+                        <td>₦{{ "%.2f"|format(order['total_price'] + order['delivery_fee']) }}</td>
+                        <td>
+                            <span class="status-badge {{ order['payment_status'] }}">
+                                {{ order['payment_status'].title() }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge {{ order['order_status'].replace(' ', '-') }}">
+                                {{ order['order_status'].title() }}
+                            </span>
+                        </td>
+                        <td>
+                            <form action="/admin/update-order/{{ order['id'] }}" method="POST">
+                                <select name="order_status" class="status-select-sm">
+                                    <option value="pending" {{ 'selected' if order['order_status'] == 'pending' }}>Pending</option>
+                                    <option value="confirmed" {{ 'selected' if order['order_status'] == 'confirmed' }}>Confirmed</option>
+                                    <option value="preparing" {{ 'selected' if order['order_status'] == 'preparing' }}>Preparing</option>
+                                    <option value="on the way" {{ 'selected' if order['order_status'] == 'on the way' }}>On The Way</option>
+                                    <option value="delivered" {{ 'selected' if order['order_status'] == 'delivered' }}>Delivered</option>
+                                </select>
+                                <button type="submit" class="btn-update">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No orders yet.</p>
+        </div>
+        {% endif %}
+
+    </section>
+
+    <footer>
+        <p>© 2026 QuickDeliver Admin Panel</p>
+    </footer>
+
+</body>
+</html>
